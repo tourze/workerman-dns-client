@@ -1,0 +1,31 @@
+{
+  "name": "tourze/workerman-dns-client",
+  "description": "DNS Query Client in Workerman",
+  "type": "library",
+  "require": {
+    "php": "^8.1",
+    "react/dns": "^1.13",
+    "workerman/workerman": "^5.1",
+    "symfony/cache": "^6.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tourze\\Workerman\\DnsClient\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tourze\\Workerman\\DnsClient\\Tests\\": "tests/"
+    }
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Tourze",
+      "email": "tourze@example.com"
+    }
+  ]
+}
