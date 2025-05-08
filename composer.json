@@ -2,12 +2,13 @@
   "name": "tourze/workerman-dns-client",
   "description": "DNS Query Client in Workerman",
   "type": "library",
+  "license": "MIT",
   "require": {
     "php": "^8.1",
     "ext-filter": "*",
     "react/dns": "^1.13",
-    "workerman/workerman": "^5.1",
-    "symfony/cache": "^6.4"
+    "symfony/cache": "^6.4",
+    "workerman/workerman": "^5.1"
   },
   "require-dev": {
     "phpstan/phpstan": "^2.1",
@@ -22,6 +23,5 @@
     "psr-4": {
       "Tourze\\Workerman\\DnsClient\\Tests\\": "tests/"
     }
-  },
-  "license": "MIT"
+  }
 }
