@@ -1,121 +1,120 @@
 # Workerman DNS Client
 
-基于 Workerman 的 DNS 客户端，用于解析 DNS 域名，并提供支持自定义 DNS 解析的 TCP 连接。
+This is a DNS query client for use in the Workerman environment, designed for asynchronous domain name resolution to IP addresses.
 
-## 安装
+## Features
 
-```bash
-composer require tourze/workerman-dns-client
-```
+- Asynchronous DNS query support
+- Uses React DNS protocol
+- Caching of query results
+- Fully testable modular design
+- Interface-based, loose coupling with dependency injection
 
-## 功能
-
-1. 支持使用自定义 DNS 服务器进行 DNS 查询
-2. 提供缓存机制避免重复查询
-3. 扩展了 AsyncTcpConnection，支持使用自定义 DNS 解析
-
-## 基本用法
-
-### DNS 查询
+## Basic Usage
 
 ```php
+<?php
+
 use React\Dns\Model\Message;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Tourze\Workerman\DnsClient\DnsQuery;
-use Workerman\Worker;
+use Tourze\Workerman\DnsClient\DnsQueryFactory;
 
-require_once __DIR__ . '/vendor/autoload.php';
+// Create a cache adapter
+$cache = new ArrayAdapter();
 
-$worker = new Worker();
-$worker->onWorkerStart = function() {
-    // 创建缓存
-    $cache = new ArrayAdapter();
-    
-    // 创建DNS查询
-    $query = new DnsQuery(
-        $cache,                      // 缓存适配器
-        'example.com',               // 要查询的域名
-        Message::TYPE_A,             // 查询类型 (A记录)
-        '8.8.8.8',                   // DNS服务器IP (此处使用Google DNS)
-        53                           // DNS服务器端口
-    );
-    
-    // 解析IP
-    $query->resolveIP(
-        function($ip) {
-            echo "解析成功: $ip\n";
-        },
-        function() {
-            echo "解析失败\n";
-        }
-    );
-};
+// Create a DNS query client
+$dnsClient = DnsQueryFactory::create($cache, 'example.com', Message::TYPE_A);
 
-Worker::runAll();
+// Perform DNS query
+$dnsClient->resolveIP(
+    function (string $ip) {
+        echo "Resolution successful: $ip\n";
+    },
+    function () {
+        echo "Resolution failed\n";
+    }
+);
 ```
 
-### 使用自定义DNS解析的AsyncTcpConnection
+## Advanced Usage
+
+You can customize the DNS server address and timeout:
 
 ```php
+<?php
+
+use React\Dns\Model\Message;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Tourze\Workerman\DnsClient\DnsAsyncTcpConnection;
-use Workerman\Worker;
+use Tourze\Workerman\DnsClient\DnsQueryFactory;
 
-require_once __DIR__ . '/vendor/autoload.php';
+$cache = new ArrayAdapter();
+$dnsClient = DnsQueryFactory::create(
+    $cache,               // Cache adapter
+    'example.com',        // Domain to query
+    Message::TYPE_A,      // Query type, defaults to A record
+    '8.8.8.8',           // DNS server address, defaults to 1.1.1.1
+    53,                  // DNS server port, defaults to 53
+    10                   // Query timeout in seconds, defaults to 5
+);
 
-$worker = new Worker();
-$worker->onWorkerStart = function() {
-    // 初始化DNS缓存
-    DnsAsyncTcpConnection::initDnsCache(new ArrayAdapter());
-    
-    // 创建连接
-    $connection = new DnsAsyncTcpConnection('ws://example.com:8080');
-    
-    // 设置DNS服务器 (可选)
-    $connection->setDnsServer('1.1.1.1', 53);
-    
-    // 连接事件
-    $connection->onConnect = function($connection) {
-        echo "连接成功\n";
-        $connection->send('hello');
-    };
-    
-    $connection->onMessage = function($connection, $data) {
-        echo "收到消息: $data\n";
-    };
-    
-    $connection->onError = function($connection, $code, $msg) {
-        echo "错误: $code $msg\n";
-    };
-    
-    $connection->onClose = function($connection) {
-        echo "连接关闭\n";
-    };
-    
-    // 建立连接
-    $connection->connect();
-};
-
-Worker::runAll();
+$dnsClient->resolveIP(
+    function (string $ip) {
+        echo "Resolution successful: $ip\n";
+    },
+    function () {
+        echo "Resolution failed\n";
+    }
+);
 ```
 
-## 高级用法
+## Custom Components
 
-### 强制使用DNS解析
-
-即使是IP地址也可以强制使用DNS解析（在某些特殊场景下可能需要）：
+You can inject your own interface implementations to customize the DNS client behavior:
 
 ```php
-$connection = new DnsAsyncTcpConnection('ws://192.168.1.1:8080');
-$connection->forceDnsLookup(true);
+<?php
+
+use Tourze\Workerman\DnsClient\Cache\DnsCacheInterface;
+use Tourze\Workerman\DnsClient\Connection\UdpConnectionFactoryInterface;
+use Tourze\Workerman\DnsClient\DnsConfig;
+use Tourze\Workerman\DnsClient\DnsQuery;
+use Tourze\Workerman\DnsClient\Logger\LoggerInterface;
+use Tourze\Workerman\DnsClient\Protocol\DnsProtocolHandlerInterface;
+use Tourze\Workerman\DnsClient\Timer\TimerInterface;
+
+// Create your custom components...
+
+$dnsQuery = new DnsQuery(
+    $config,               // Configuration
+    $cache,                // Cache
+    $connectionFactory,    // Connection factory
+    $protocolHandler,      // Protocol handler
+    $timer,                // Timer
+    $logger                // Logger
+);
 ```
 
-### 使用不同的缓存适配器
+## Component Details
 
-```php
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+- `DnsConfig` - Stores DNS query configuration
+- `DnsCacheInterface` - Provides DNS resolution result caching
+- `UdpConnectionFactoryInterface` - Creates UDP connections
+- `DnsProtocolHandlerInterface` - Handles DNS protocol operations
+- `TimerInterface` - Handles timeouts
+- `LoggerInterface` - Logs messages
 
-// 使用文件缓存
-$cache = new FilesystemAdapter('dns', 300, '/tmp/dns-cache');
-DnsAsyncTcpConnection::initDnsCache($cache);
+## Testing
+
+The library is designed with testing in mind. Each component can be mocked or replaced for unit testing.
+
+```bash
+./vendor/bin/phpunit packages/workerman-dns-client/tests
 ```
+
+## Requirements
+
+- PHP 8.1 or higher
+- ext-filter
+- workerman/workerman ^5.1
+- react/dns ^1.13
+- symfony/cache ^6.4

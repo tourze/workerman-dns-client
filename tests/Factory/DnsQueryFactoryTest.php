@@ -1,0 +1,42 @@
+<?php
+
+namespace Tourze\Workerman\DnsClient\Tests\Factory;
+
+use PHPUnit\Framework\TestCase;
+use React\Dns\Model\Message;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Tourze\Workerman\DnsClient\DnsClientInterface;
+use Tourze\Workerman\DnsClient\DnsQuery;
+use Tourze\Workerman\DnsClient\DnsQueryFactory;
+
+class DnsQueryFactoryTest extends TestCase
+{
+    public function testCreateReturnsValidDnsClient(): void
+    {
+        $cache = new ArrayAdapter();
+        $domain = 'example.com';
+        $type = Message::TYPE_A;
+        $dnsServer = '8.8.8.8';
+        $dnsPort = 53;
+        $timeout = 10;
+        
+        $client = DnsQueryFactory::create($cache, $domain, $type, $dnsServer, $dnsPort, $timeout);
+        
+        $this->assertInstanceOf(DnsClientInterface::class, $client);
+        $this->assertInstanceOf(DnsQuery::class, $client);
+    }
+    
+    public function testCreateUsesDefaultValuesWhenNotProvided(): void
+    {
+        $cache = new ArrayAdapter();
+        $domain = 'example.com';
+        
+        $client = DnsQueryFactory::create($cache, $domain);
+        
+        $this->assertInstanceOf(DnsClientInterface::class, $client);
+        $this->assertInstanceOf(DnsQuery::class, $client);
+        
+        // 无法轻易测试默认值是否被使用，因为这些值在DnsQuery内部封装
+        // 但至少我们可以确保工厂方法在没有提供默认值的情况下仍然能工作
+    }
+} 
