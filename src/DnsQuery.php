@@ -114,7 +114,7 @@ class DnsQuery implements DnsClientInterface
             $timerId
         ) {
             // 清除超时定时器
-            if ($timerId) {
+            if ($timerId !== 0) {
                 $this->timer->del($timerId);
             }
 
@@ -167,7 +167,7 @@ class DnsQuery implements DnsClientInterface
             $reject,
             $timerId
         ) {
-            if ($timerId) {
+            if ($timerId !== 0) {
                 $this->timer->del($timerId);
             }
             $this->logger->log("DNS连接错误 [{$domain}]: $code $msg");

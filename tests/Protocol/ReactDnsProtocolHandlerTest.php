@@ -29,8 +29,6 @@ class ReactDnsProtocolHandlerTest extends TestCase
         $type = Message::TYPE_A;
         
         $packet = $this->handler->createQueryPacket($domain, $type);
-        
-        $this->assertIsString($packet);
         $this->assertNotEmpty($packet);
     }
     
