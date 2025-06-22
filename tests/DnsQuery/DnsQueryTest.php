@@ -326,7 +326,7 @@ class DnsQueryTest extends TestCase
     
     /**
      * 创建一个可模拟的回调函数
-     * 
+     *
      * @return MockObject
      */
     private function getMockCallable(): MockObject
