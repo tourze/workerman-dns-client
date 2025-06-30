@@ -59,6 +59,9 @@ class LoggerTest extends TestCase
         $params = $reflectionMethod->getParameters();
         $this->assertCount(1, $params);
         $this->assertEquals('message', $params[0]->getName());
-        $this->assertEquals('string', $params[0]->getType()->getName());
+        $type = $params[0]->getType();
+        if ($type instanceof \ReflectionNamedType) {
+            $this->assertEquals('string', $type->getName());
+        }
     }
 } 
