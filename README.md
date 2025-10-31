@@ -1,16 +1,41 @@
 # Workerman DNS Client
 
-This is a DNS query client for use in the Workerman environment, designed for asynchronous domain name resolution to IP addresses.
+[English](README.md) | [中文](README.zh-CN.md)
+
+[![Latest Version](https://img.shields.io/packagist/v/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![Total Downloads](https://img.shields.io/packagist/dt/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![PHP Version Require](https://img.shields.io/packagist/php-v/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![License](https://img.shields.io/packagist/l/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![codecov](https://codecov.io/gh/tourze/php-monorepo/branch/master/graph/badge.svg?token=COVERAGE_TOKEN&flag=workerman-dns-client)](https://codecov.io/gh/tourze/php-monorepo)
+
+A high-performance asynchronous DNS query client specifically designed for the Workerman environment, providing non-blocking domain name resolution to IP addresses.
 
 ## Features
 
-- Asynchronous DNS query support
-- Uses React DNS protocol
-- Caching of query results
-- Fully testable modular design
-- Interface-based, loose coupling with dependency injection
+- **Asynchronous DNS Resolution** - Non-blocking DNS queries using Workerman's event loop
+- **React DNS Protocol Support** - Built on the reliable React DNS library
+- **Smart Caching** - Configurable result caching using Symfony Cache components
+- **Modular Architecture** - Fully testable design with dependency injection
+- **Interface-based Design** - Loose coupling allows easy customization and testing
+- **Production Ready** - Comprehensive error handling and logging support
 
-## Basic Usage
+## Installation
+
+```bash
+composer require tourze/workerman-dns-client
+```
+
+## Requirements
+
+- PHP 8.1 or higher
+- ext-filter
+- workerman/workerman ^5.1
+- react/dns ^1.13
+- symfony/cache ^7.3
+
+## Quick Start
+
+### Basic Usage
 
 ```php
 <?php
@@ -36,9 +61,9 @@ $dnsClient->resolveIP(
 );
 ```
 
-## Advanced Usage
+### Advanced Configuration
 
-You can customize the DNS server address and timeout:
+You can customize DNS server settings and timeouts:
 
 ```php
 <?php
@@ -51,10 +76,10 @@ $cache = new ArrayAdapter();
 $dnsClient = DnsQueryFactory::create(
     $cache,               // Cache adapter
     'example.com',        // Domain to query
-    Message::TYPE_A,      // Query type, defaults to A record
-    '8.8.8.8',           // DNS server address, defaults to 1.1.1.1
-    53,                  // DNS server port, defaults to 53
-    10                   // Query timeout in seconds, defaults to 5
+    Message::TYPE_A,      // Query type (A, AAAA, MX, etc.)
+    '8.8.8.8',           // DNS server address (default: 1.1.1.1)
+    53,                  // DNS server port (default: 53)
+    10                   // Query timeout in seconds (default: 5)
 );
 
 $dnsClient->resolveIP(
@@ -67,9 +92,22 @@ $dnsClient->resolveIP(
 );
 ```
 
-## Custom Components
+## Architecture
 
-You can inject your own interface implementations to customize the DNS client behavior:
+### Component Overview
+
+The library follows a modular architecture with clear separation of concerns:
+
+- **`DnsConfig`** - Immutable configuration object storing DNS query parameters
+- **`DnsCacheInterface`** - Caching layer for DNS resolution results
+- **`UdpConnectionFactoryInterface`** - Factory for creating UDP connections
+- **`DnsProtocolHandlerInterface`** - DNS protocol operations and message handling
+- **`TimerInterface`** - Timeout management for queries
+- **`LoggerInterface`** - Logging and debugging support
+
+### Custom Implementation
+
+For advanced use cases, you can provide custom implementations:
 
 ```php
 <?php
@@ -82,39 +120,34 @@ use Tourze\Workerman\DnsClient\Logger\LoggerInterface;
 use Tourze\Workerman\DnsClient\Protocol\DnsProtocolHandlerInterface;
 use Tourze\Workerman\DnsClient\Timer\TimerInterface;
 
-// Create your custom components...
+// Custom configuration
+$config = new DnsConfig('example.com', Message::TYPE_A, '8.8.8.8', 53, 10);
 
+// Inject custom components
 $dnsQuery = new DnsQuery(
     $config,               // Configuration
-    $cache,                // Cache
-    $connectionFactory,    // Connection factory
-    $protocolHandler,      // Protocol handler
-    $timer,                // Timer
-    $logger                // Logger
+    $customCache,          // Your cache implementation
+    $customConnectionFactory, // Your connection factory
+    $customProtocolHandler,   // Your protocol handler
+    $customTimer,          // Your timer implementation
+    $customLogger          // Your logger implementation
 );
 ```
 
-## Component Details
-
-- `DnsConfig` - Stores DNS query configuration
-- `DnsCacheInterface` - Provides DNS resolution result caching
-- `UdpConnectionFactoryInterface` - Creates UDP connections
-- `DnsProtocolHandlerInterface` - Handles DNS protocol operations
-- `TimerInterface` - Handles timeouts
-- `LoggerInterface` - Logs messages
-
 ## Testing
 
-The library is designed with testing in mind. Each component can be mocked or replaced for unit testing.
+Run the test suite:
 
 ```bash
 ./vendor/bin/phpunit packages/workerman-dns-client/tests
 ```
 
-## Requirements
+The library includes comprehensive unit tests covering all components and integration scenarios.
 
-- PHP 8.1 or higher
-- ext-filter
-- workerman/workerman ^5.1
-- react/dns ^1.13
-- symfony/cache ^6.4
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE) for more information.

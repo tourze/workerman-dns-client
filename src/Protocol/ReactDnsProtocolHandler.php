@@ -3,6 +3,7 @@
 namespace Tourze\Workerman\DnsClient\Protocol;
 
 use React\Dns\Model\Message;
+use React\Dns\Model\Record;
 use React\Dns\Protocol\BinaryDumper;
 use React\Dns\Protocol\Parser;
 use React\Dns\Query\Query;
@@ -21,10 +22,11 @@ class ReactDnsProtocolHandler implements DnsProtocolHandlerInterface
     private const DEFAULT_TTL = 600;
 
     private readonly BinaryDumper $dumper;
+
     private readonly Parser $parser;
 
     public function __construct(
-        private readonly LoggerInterface $logger = new NullLogger()
+        private readonly LoggerInterface $logger = new NullLogger(),
     ) {
         $this->dumper = new BinaryDumper();
         $this->parser = new Parser();
@@ -47,31 +49,45 @@ class ReactDnsProtocolHandler implements DnsProtocolHandlerInterface
         }
     }
 
+    /**
+     * @param Record[] $answers
+     */
     public function extractIPFromAnswers(array $answers): ?string
     {
-        if (empty($answers)) {
-            $this->logger->log("DNS解析为空");
+        if (0 === count($answers)) {
+            $this->logger->log('DNS解析为空');
+
             return null;
         }
 
         foreach ($answers as $answer) {
-            if (filter_var($answer->data, FILTER_VALIDATE_IP)) {
-                return $answer->data;
+            if (is_string($answer->data)) {
+                $ip = filter_var($answer->data, FILTER_VALIDATE_IP);
+                if (false !== $ip) {
+                    return $answer->data;
+                }
             }
         }
 
-        $this->logger->log("DNS解析找不到合法IP");
+        $this->logger->log('DNS解析找不到合法IP');
+
         return null;
     }
 
+    /**
+     * @param Record[] $answers
+     */
     public function getTtlFromAnswers(array $answers): int
     {
         $ttl = self::DEFAULT_TTL;
 
         foreach ($answers as $answer) {
-            if (filter_var($answer->data, FILTER_VALIDATE_IP)) {
-                $ttl = $answer->ttl;
-                break;
+            if (is_string($answer->data)) {
+                $ip = filter_var($answer->data, FILTER_VALIDATE_IP);
+                if (false !== $ip) {
+                    $ttl = $answer->ttl;
+                    break;
+                }
             }
         }
 

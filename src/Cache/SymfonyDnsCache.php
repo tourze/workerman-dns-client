@@ -23,9 +23,8 @@ class SymfonyDnsCache implements DnsCacheInterface
 
     public function __construct(
         private readonly AdapterInterface $cache,
-        private readonly LoggerInterface $logger = new NullLogger()
-    )
-    {
+        private readonly LoggerInterface $logger = new NullLogger(),
+    ) {
     }
 
     /**
@@ -36,16 +35,14 @@ class SymfonyDnsCache implements DnsCacheInterface
         return self::CACHE_PREFIX . md5($domain);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function get(string $domain): ?string
     {
         $cacheItem = $this->cache->getItem($this->getCacheKey($domain));
 
         if ($cacheItem->isHit()) {
             $ip = $cacheItem->get();
-            $this->logger->log("已从缓存获得结果：{$domain}:$ip");
+            $this->logger->log("已从缓存获得结果：{$domain}:{$ip}");
+
             return $ip;
         }
 

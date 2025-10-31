@@ -9,6 +9,9 @@ use Workerman\Timer as WorkermanTimerLib;
  */
 class WorkermanTimer implements TimerInterface
 {
+    /**
+     * @param mixed[] $args
+     */
     public function add(float $interval, callable $callback, array $args = [], bool $persistent = true): int
     {
         return WorkermanTimerLib::add($interval, $callback, $args, $persistent);

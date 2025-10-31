@@ -1,7 +1,8 @@
 <?php
 
-namespace Tourze\Workerman\DnsClient\Tests\Unit;
+namespace Tourze\Workerman\DnsClient\Tests;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use React\Dns\Model\Message;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -9,7 +10,11 @@ use Tourze\Workerman\DnsClient\DnsClientInterface;
 use Tourze\Workerman\DnsClient\DnsConfig;
 use Tourze\Workerman\DnsClient\DnsQueryFactory;
 
-class DnsQueryFactoryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(DnsQueryFactory::class)]
+final class DnsQueryFactoryTest extends TestCase
 {
     public function testCreateWithDefaultParameters(): void
     {

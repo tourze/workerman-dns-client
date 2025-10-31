@@ -13,8 +13,7 @@ interface UdpConnectionFactoryInterface
      * 创建一个UDP连接
      *
      * @param string $address UDP服务器地址
-     * @param int $port UDP服务器端口
-     * @return AsyncUdpConnection
+     * @param int    $port    UDP服务器端口
      */
     public function createConnection(string $address, int $port): AsyncUdpConnection;
 }

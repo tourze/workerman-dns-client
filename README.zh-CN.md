@@ -1,6 +1,23 @@
-# workerman-dns-client
+# Workerman DNS Client
 
-DNS Query Client in Workerman
+[English](README.md) | [中文](README.zh-CN.md)
+
+[![Latest Version](https://img.shields.io/packagist/v/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![Total Downloads](https://img.shields.io/packagist/dt/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![PHP Version Require](https://img.shields.io/packagist/php-v/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![License](https://img.shields.io/packagist/l/tourze/workerman-dns-client.svg?style=flat-square)](https://packagist.org/packages/tourze/workerman-dns-client)
+[![codecov](https://codecov.io/gh/tourze/php-monorepo/branch/master/graph/badge.svg?token=COVERAGE_TOKEN&flag=workerman-dns-client)](https://codecov.io/gh/tourze/php-monorepo)
+
+专为 Workerman 环境设计的高性能异步 DNS 查询客户端，提供非阻塞的域名到 IP 地址解析功能。
+
+## 特性
+
+- **异步 DNS 解析** - 使用 Workerman 事件循环的非阻塞 DNS 查询
+- **React DNS 协议支持** - 基于可靠的 React DNS 库构建
+- **智能缓存** - 使用 Symfony Cache 组件的可配置结果缓存
+- **模块化架构** - 完全可测试的依赖注入设计
+- **接口化设计** - 松耦合设计便于自定义和测试
+- **生产就绪** - 全面的错误处理和日志记录支持
 
 ## 安装
 
@@ -8,19 +25,17 @@ DNS Query Client in Workerman
 composer require tourze/workerman-dns-client
 ```
 
-## Workerman DNS 客户端
+## 系统要求
 
-这是在Workerman环境中使用的DNS查询客户端，用于异步解析域名到IP地址。
+- PHP 8.1 或更高版本
+- ext-filter 扩展
+- workerman/workerman ^5.1
+- react/dns ^1.13
+- symfony/cache ^7.3
 
-### 特性
+## 快速开始
 
-- 支持异步DNS查询
-- 使用React DNS协议
-- 支持缓存查询结果
-- 完全可测试的模块化设计
-- 使用接口和依赖注入实现松耦合
-
-### 用法
+### 基本用法
 
 ```php
 <?php
@@ -46,9 +61,9 @@ $dnsClient->resolveIP(
 );
 ```
 
-### 高级用法
+### 高级配置
 
-您可以自定义DNS服务器地址和超时时间：
+您可以自定义 DNS 服务器设置和超时时间：
 
 ```php
 <?php
@@ -61,10 +76,10 @@ $cache = new ArrayAdapter();
 $dnsClient = DnsQueryFactory::create(
     $cache,               // 缓存适配器
     'example.com',        // 要查询的域名
-    Message::TYPE_A,      // 查询类型，默认为A记录
-    '8.8.8.8',           // DNS服务器地址，默认为1.1.1.1
-    53,                  // DNS服务器端口，默认为53
-    10                   // 查询超时时间（秒），默认为5
+    Message::TYPE_A,      // 查询类型（A、AAAA、MX 等）
+    '8.8.8.8',           // DNS服务器地址（默认：1.1.1.1）
+    53,                  // DNS服务器端口（默认：53）
+    10                   // 查询超时时间秒数（默认：5）
 );
 
 $dnsClient->resolveIP(
@@ -77,9 +92,22 @@ $dnsClient->resolveIP(
 );
 ```
 
-### 自定义组件
+## 架构设计
 
-您可以注入自己实现的接口来自定义DNS客户端的行为：
+### 组件概览
+
+该库遵循模块化架构设计，具有清晰的关注点分离：
+
+- **`DnsConfig`** - 存储 DNS 查询参数的不可变配置对象
+- **`DnsCacheInterface`** - DNS 解析结果的缓存层
+- **`UdpConnectionFactoryInterface`** - 创建 UDP 连接的工厂
+- **`DnsProtocolHandlerInterface`** - DNS 协议操作和消息处理
+- **`TimerInterface`** - 查询的超时管理
+- **`LoggerInterface`** - 日志记录和调试支持
+
+### 自定义实现
+
+对于高级用例，您可以提供自定义实现：
 
 ```php
 <?php
@@ -92,35 +120,34 @@ use Tourze\Workerman\DnsClient\Logger\LoggerInterface;
 use Tourze\Workerman\DnsClient\Protocol\DnsProtocolHandlerInterface;
 use Tourze\Workerman\DnsClient\Timer\TimerInterface;
 
-// 创建自定义组件...
+// 自定义配置
+$config = new DnsConfig('example.com', Message::TYPE_A, '8.8.8.8', 53, 10);
 
+// 注入自定义组件
 $dnsQuery = new DnsQuery(
-    $config,               // 配置
-    $cache,                // 缓存
-    $connectionFactory,    // 连接工厂
-    $protocolHandler,      // 协议处理器
-    $timer,                // 定时器
-    $logger                // 日志记录器
+    $config,                  // 配置
+    $customCache,             // 您的缓存实现
+    $customConnectionFactory, // 您的连接工厂
+    $customProtocolHandler,   // 您的协议处理器
+    $customTimer,             // 您的定时器实现
+    $customLogger             // 您的日志记录器
 );
 ```
 
-### 组件详解
+## 测试
 
-- `DnsConfig` - 存储DNS查询配置
-- `DnsCacheInterface` - 提供DNS解析结果缓存
-- `UdpConnectionFactoryInterface` - 创建UDP连接
-- `DnsProtocolHandlerInterface` - 处理DNS协议相关操作
-- `TimerInterface` - 处理超时
-- `LoggerInterface` - 记录日志
+运行测试套件：
 
-## 配置
+```bash
+./vendor/bin/phpunit packages/workerman-dns-client/tests
+```
 
-待补充
+该库包含覆盖所有组件和集成场景的全面单元测试。
 
-## 示例
+## 贡献
 
-待补充
+欢迎贡献代码！请随时提交 Pull Request。
 
-## 参考文档
+## 许可证
 
-- [示例链接](https://example.com)
+MIT 许可证。详情请参见 [许可证文件](LICENSE)。

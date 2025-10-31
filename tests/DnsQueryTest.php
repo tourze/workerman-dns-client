@@ -1,7 +1,9 @@
 <?php
 
-namespace Tourze\Workerman\DnsClient\Tests\Unit;
+namespace Tourze\Workerman\DnsClient\Tests;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Tourze\Workerman\DnsClient\Cache\DnsCacheInterface;
 use Tourze\Workerman\DnsClient\Connection\UdpConnectionFactoryInterface;
@@ -11,17 +13,28 @@ use Tourze\Workerman\DnsClient\Logger\LoggerInterface;
 use Tourze\Workerman\DnsClient\Protocol\DnsProtocolHandlerInterface;
 use Tourze\Workerman\DnsClient\Timer\TimerInterface;
 
-class DnsQueryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(DnsQuery::class)]
+final class DnsQueryTest extends TestCase
 {
-    private DnsCacheInterface $cache;
-    private UdpConnectionFactoryInterface $connectionFactory;
-    private DnsProtocolHandlerInterface $protocolHandler;
-    private TimerInterface $timer;
-    private LoggerInterface $logger;
+    private DnsCacheInterface&MockObject $cache;
+
+    private UdpConnectionFactoryInterface&MockObject $connectionFactory;
+
+    private DnsProtocolHandlerInterface&MockObject $protocolHandler;
+
+    private TimerInterface&MockObject $timer;
+
+    private LoggerInterface&MockObject $logger;
+
     private DnsConfig $config;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->cache = $this->createMock(DnsCacheInterface::class);
         $this->connectionFactory = $this->createMock(UdpConnectionFactoryInterface::class);
         $this->protocolHandler = $this->createMock(DnsProtocolHandlerInterface::class);
@@ -50,7 +63,8 @@ class DnsQueryTest extends TestCase
         $this->cache->expects($this->once())
             ->method('get')
             ->with('example.com')
-            ->willReturn($expectedIp);
+            ->willReturn($expectedIp)
+        ;
 
         $resolved = false;
         $resolvedIp = null;
@@ -64,7 +78,7 @@ class DnsQueryTest extends TestCase
             $this->logger
         );
 
-        $dnsQuery->resolveIP(function ($ip) use (&$resolved, &$resolvedIp) {
+        $dnsQuery->resolveIP(function ($ip) use (&$resolved, &$resolvedIp): void {
             $resolved = true;
             $resolvedIp = $ip;
         });

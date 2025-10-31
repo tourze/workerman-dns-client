@@ -4,27 +4,48 @@ namespace Tourze\Workerman\DnsClient\Tests\Logger;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Tourze\Workerman\DnsClient\Logger\LoggerInterface;
 use Tourze\Workerman\DnsClient\Logger\NullLogger;
 
 /**
  * @internal
  */
 #[CoversClass(NullLogger::class)]
-final class LoggerTest extends TestCase
+final class NullLoggerTest extends TestCase
 {
-    /**
-     * 测试NullLogger不执行任何操作
-     */
-    public function testNullLoggerDoesNothing(): void
+    public function testImplementsLoggerInterface(): void
     {
         $logger = new NullLogger();
 
-        // 由于NullLogger没有任何可观察的行为，我们只能确保调用不会抛出异常
+        $this->assertInstanceOf(LoggerInterface::class, $logger);
+    }
+
+    public function testLogDoesNotThrowException(): void
+    {
+        $logger = new NullLogger();
+
+        // 验证调用不产生任何输出或异常
         ob_start();
-        $logger->log('测试消息');
+        $logger->log('Test message');
+        $logger->log('');
+        $logger->log('Another test message with special chars: 中文测试');
         $output = ob_get_clean();
 
-        $this->assertEquals('', $output);
+        $this->assertEquals('', $output, 'NullLogger should not produce any output');
+    }
+
+    public function testLogCanBeCalledMultipleTimes(): void
+    {
+        $logger = new NullLogger();
+
+        // 验证多次调用不产生任何输出
+        ob_start();
+        for ($i = 0; $i < 100; ++$i) {
+            $logger->log("Message {$i}");
+        }
+        $output = ob_get_clean();
+
+        $this->assertEquals('', $output, 'Multiple calls to NullLogger should not produce any output');
     }
 
     public function testLog(): void

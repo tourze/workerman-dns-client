@@ -18,13 +18,12 @@ class DnsQueryFactory
     /**
      * 创建默认的DNS查询客户端
      *
-     * @param AdapterInterface $cache 缓存适配器
-     * @param string $domain 要查询的域名
-     * @param int $type 查询类型，默认为A记录
-     * @param string $dnsServer DNS服务器地址
-     * @param int $dnsPort DNS服务器端口
-     * @param int $timeout 查询超时时间（秒）
-     * @return DnsClientInterface
+     * @param AdapterInterface $cache     缓存适配器
+     * @param string           $domain    要查询的域名
+     * @param int              $type      查询类型，默认为A记录
+     * @param string           $dnsServer DNS服务器地址
+     * @param int              $dnsPort   DNS服务器端口
+     * @param int              $timeout   查询超时时间（秒）
      */
     public static function create(
         AdapterInterface $cache,
@@ -32,18 +31,18 @@ class DnsQueryFactory
         int $type = Message::TYPE_A,
         string $dnsServer = DnsConfig::DEFAULT_DNS_SERVER,
         int $dnsPort = DnsConfig::DEFAULT_DNS_PORT,
-        int $timeout = DnsConfig::DEFAULT_TIMEOUT
+        int $timeout = DnsConfig::DEFAULT_TIMEOUT,
     ): DnsClientInterface {
         // 创建配置
         $config = new DnsConfig($domain, $type, $dnsServer, $dnsPort, $timeout);
-        
+
         // 创建依赖组件
         $dnsCache = new SymfonyDnsCache($cache);
         $connectionFactory = new WorkermanUdpConnectionFactory();
         $protocolHandler = new ReactDnsProtocolHandler();
         $timer = new WorkermanTimer();
         $logger = new WorkermanLogger();
-        
+
         // 创建DNS查询客户端
         return new DnsQuery(
             $config,

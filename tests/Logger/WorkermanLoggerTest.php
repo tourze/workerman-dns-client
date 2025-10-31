@@ -4,32 +4,25 @@ namespace Tourze\Workerman\DnsClient\Tests\Logger;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tourze\Workerman\DnsClient\Logger\NullLogger;
+use Tourze\Workerman\DnsClient\Logger\LoggerInterface;
+use Tourze\Workerman\DnsClient\Logger\WorkermanLogger;
 
 /**
  * @internal
  */
-#[CoversClass(NullLogger::class)]
-final class LoggerTest extends TestCase
+#[CoversClass(WorkermanLogger::class)]
+final class WorkermanLoggerTest extends TestCase
 {
-    /**
-     * 测试NullLogger不执行任何操作
-     */
-    public function testNullLoggerDoesNothing(): void
+    public function testImplementsLoggerInterface(): void
     {
-        $logger = new NullLogger();
+        $logger = new WorkermanLogger();
 
-        // 由于NullLogger没有任何可观察的行为，我们只能确保调用不会抛出异常
-        ob_start();
-        $logger->log('测试消息');
-        $output = ob_get_clean();
-
-        $this->assertEquals('', $output);
+        $this->assertInstanceOf(LoggerInterface::class, $logger);
     }
 
     public function testLog(): void
     {
-        $logger = new NullLogger();
+        $logger = new WorkermanLogger();
 
         // 验证log方法存在且可调用
         $reflectionClass = new \ReflectionClass($logger);
@@ -54,11 +47,5 @@ final class LoggerTest extends TestCase
         if ($returnType instanceof \ReflectionNamedType) {
             $this->assertEquals('void', $returnType->getName());
         }
-
-        // 验证调用不产生任何输出
-        ob_start();
-        $logger->log('Test message');
-        $output = ob_get_clean();
-        $this->assertEquals('', $output);
     }
 }
